@@ -1,0 +1,137 @@
+---
+title: "f1dataR_worked_examples"
+format: pdf
+editor: visual
+---
+
+```{r}
+library(f1dataR)
+library(dplyr)
+library(ggplot2)
+library(ggridges)
+
+# For vignette run through Monaco GP (Round 8) in 2025 is used
+# Race parameter was converted to Round by package developers a few days ago
+```
+
+Initializing vignette functions work through
+
+```{r}
+load_laps(season = 2025, round = 8)
+```
+
+```{r}
+load_session_laps(season = 2025, round = 8, session = "R", add_weather = FALSE)
+
+```
+
+```{r}
+load_driver_telemetry(season = 2025, round = 8, session = "R", driver = "LEC", laps = "all")
+```
+
+```{r}
+load_circuit_details(2025, 8)
+```
+
+```{r}
+plot_fastest(season = 2025, round = 8, session = "R", driver = "LEC", color = "gear")
+
+```
+
+```{r}
+# Example graph work through 
+session_laps <- load_session_laps(season = 2025, round = 8, session = "R", add_weather = FALSE)
+
+session_laps |>
+  ggplot(aes(lap_number, lap_time, color = driver)) + 
+  geom_line() +
+  labs(
+    title = "Monaco GP 2025 Driver Lap Times",
+    x = "Lap Number",
+    y = "Lap Time (s)",
+    color = "Driver"
+  ) +
+  theme_classic() +
+  theme(
+    legend.text = element_text(size = 6),
+    legend.title = element_text(size = 8),
+    legend.key.size = unit(0.4, "cm")
+  )
+```
+
+New worked through comparing Silverstone GP (Round 12) in 2025 vs. Monaco GP (Round 8)
+
+Comparing relative lap time and
+
+```{r}
+#Monaco GP 2025 Round 8 
+monaco <- load_session_laps(2025, 8, "R")
+
+monaco |>
+  mutate(relative_lap = lap_time - min(lap_time, na.rm = TRUE)) |>
+  group_by(driver, team) |>
+  summarise(avg_relative_lap = mean(relative_lap, na.rm = TRUE)) |>
+  ggplot(aes(x = avg_relative_lap,
+             y = reorder(driver, avg_relative_lap),
+             fill = team)) +
+  geom_col() +
+  labs(
+    title = "Monaco GP 2025 Relative Lap Time by Driver",
+    x = "Time Behind Fastest Lap (s)",
+    y = "Driver",
+    fill = "Team"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.text = element_text(size = 7),
+    legend.title = element_text(size = 9),
+    legend.key.size = unit(0.4, "cm")
+  )
+```
+
+```{r}
+#Silverstone GP 2025 Round 12
+silverstone <- load_session_laps(2025, 12, "R")
+
+silverstone |>
+  mutate(relative_lap = lap_time - min(lap_time, na.rm = TRUE)) |>
+  group_by(driver, team) |>
+  summarise(avg_relative_lap = mean(relative_lap, na.rm = TRUE)) |>
+  ggplot(aes(x = avg_relative_lap,
+             y = reorder(driver, avg_relative_lap),
+             fill = team)) +
+  geom_col() +
+  labs(
+    title = "Silverstone GP 2025 Relative Lap Time by Driver",
+    x = "Time Behind Fastest Lap (s)",
+    y = "Driver",
+    fill = "Team"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.text = element_text(size = 7),
+    legend.title = element_text(size = 9),
+    legend.key.size = unit(0.4, "cm")
+  )
+```
+
+```{r}
+#RPM Max Verstappen vs. Lewis Hamilton Monaco GP 2025
+ver <- load_driver_telemetry(2025, 8, "R", "VER")
+ham <- load_driver_telemetry(2025, 8, "R", "HAM")
+
+ver$driver <- "VER"
+ham$driver <- "HAM"
+
+data <- bind_rows(ver, ham)
+ggplot(data, aes(distance, rpm, color = driver )) +
+geom_line() +
+labs(
+  title = "Max Verstappen vs. Lewis Hamilton RPM Monaco 2025",
+  x = "Distance (meters)",
+  y = "RPM",
+  color = "Driver"
+) +
+theme_minimal() 
+  
+```

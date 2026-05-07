@@ -61,7 +61,7 @@ session_laps |>
 
 New worked through comparing Silverstone GP (Round 12) in 2025 vs. Monaco GP (Round 8)
 
-Comparing relative lap time and
+Comparing relative lap time and RPM between Lewis Hamilton and Max Verstappen 
 
 ```{r}
 #Monaco GP 2025 Round 8 
